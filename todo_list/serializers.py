@@ -5,6 +5,9 @@ from datetime import datetime
 
 
 class TodoSerializer(serializers.ModelSerializer):
+    def get_user(self, obj):
+        return obj.user.email
+
     class Meta:
         model = Todo
         fields = '__all__'

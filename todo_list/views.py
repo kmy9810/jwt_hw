@@ -37,13 +37,13 @@ class TodoDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, todo_id):
-        todo = self.get_object(todo_id)
+        todo = self.get_object(request, todo_id)
         serializer = TodoSerializer(todo, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, todo_id):
-        todo = self.get_object(todo_id)
+        todo = self.get_object(request, todo_id)
         todo.delete()
         return Response("삭제 되었습니다!", status=status.HTTP_204_NO_CONTENT)
