@@ -6,17 +6,18 @@ from .serializers import TodoSerializer
 from faker import Faker
 
 
-# python manage.py test todo_list
+# python manage.py test todoes
 class TodoCreateTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.data = {'email': 'miyeong@naver.com', 'password': '1234'}
-        cls.user = User.objects.create_user('miyeong@naver.com', '1234')
-        cls.todo_data = {'title': 'some title'}
+        cls.user = User.objects.create_user(username='mimi', email='miyeong@naver.com', password='1234')
+        cls.todo_data = {'title': 'some title', 'do_at':'2023-02-23'}
         cls.faker = Faker()
         cls.todos = []
         for i in range(10):
-            cls.todos.append(Todo.objects.create(title=cls.faker.sentence(), user=cls.user))
+            cls.todos.append(Todo.objects.create(title=cls.faker.sentence(), user=cls.user,
+                                                 do_at=cls.faker.date()))
 
     def setUp(self):
         self.access_token = self.client.post(reverse('token_obtain_pair'), self.data).data['access']
@@ -44,16 +45,25 @@ class TodoCreateTest(APITestCase):
         )
         self.assertEquals(response.status_code, 201)
 
+    def test_all_dete_todo(self):
+        response = self.client.delete(
+            path=reverse('todo_view'),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            data=self.todo_data
+        )
+        self.assertEquals(response.status_code, 404)
+
 
 class TodoDetailTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.faker = Faker()
         cls.data = {'email': 'miyeong@naver.com', 'password': '1234'}
-        cls.user = User.objects.create_user('miyeong@naver.com', '1234')
+        cls.user = User.objects.create_user(username='mimi', email='miyeong@naver.com', password='1234')
         cls.todos = []
         for i in range(10):
-            cls.todos.append(Todo.objects.create(title=cls.faker.sentence(), user=cls.user))
+            cls.todos.append(Todo.objects.create(title=cls.faker.sentence(), user=cls.user,
+                                                 do_at=cls.faker.date()))
 
     def setUp(self):
         self.access_token = self.client.post(reverse('token_obtain_pair'), self.data).data['access']
@@ -74,6 +84,7 @@ class TodoDetailTest(APITestCase):
             response = self.client.patch(path=url,
                                          HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
                                          data={'title': self.faker.sentence()})
+            print(response.data)
             self.assertEquals(response.status_code, 200)
 
     # 할 일 삭제 테스트

@@ -1,32 +1,30 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from .validators import check_password, check_email, contains_special_character
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None):
-        """
-        Creates and saves a User with the given email, date of
-        birth and password.
-        """
+    def create_user(self, username, email=None, password=None):
+        # 이메일과 이름이 빈칸으로 들어왔을 때
         if not email:
             raise ValueError("Users must have an email address")
+        if not username:
+            raise ValueError("Users must have an username")
 
         user = self.model(
             email=self.normalize_email(email),
+            username=username,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None):
-        """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
-        """
+    def create_superuser(self, username, email=None, password=None):
         user = self.create_user(
-            email,
+            email=email,
             password=password,
+            username=username,
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -34,19 +32,21 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    email = models.EmailField(
+    email = models.EmailField( # 이메일 필드는 벨리테이터 자동으로 지정해줌
         verbose_name="email address",
         max_length=255,
         unique=True,
+        validators=[check_email]
     )
     genders = [
         ('male', 'male'),
         ('female', 'female'),
     ]
-    gender = models.CharField(choices=genders, max_length=10, default=None, null=True)
-    introduction = models.TextField(default=None, null=True)
-    name = models.CharField(max_length=20)
-    age = models.IntegerField(null=True)
+    password = models.CharField(max_length=100, validators=[check_password])
+    gender = models.CharField(choices=genders, max_length=10, blank=True, null=True)
+    introduction = models.TextField(blank=True, null=True)
+    username = models.CharField(max_length=20, unique=True, validators=[contains_special_character])
+    age = models.IntegerField(blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -54,7 +54,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.email
