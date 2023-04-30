@@ -44,7 +44,7 @@ class TodoDetailView(APIView):
 
     def patch(self, request, todo_id):
         todo = self.get_object(request, todo_id)
-        serializer = TodoSerializer(todo, data=request.data, partial=True)
+        serializer = TodoSerializer(todo, data=request.data, context={'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
