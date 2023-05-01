@@ -5,7 +5,7 @@ from todoes.serializers import TodoDetailSerializer
 from rest_framework.serializers import ValidationError
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from django.core.exceptions import ValidationError
-from .validators import (contains_special_character, check_password, check_email)
+from .validators import (contains_special_character, check_password)
 from todoes.models import Todo
 
 

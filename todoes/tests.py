@@ -45,7 +45,7 @@ class TodoCreateTest(APITestCase):
         )
         self.assertEquals(response.status_code, 201)
 
-    def test_all_dete_todo(self):
+    def test_all_delete_todo(self):
         response = self.client.delete(
             path=reverse('todo_view'),
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}",

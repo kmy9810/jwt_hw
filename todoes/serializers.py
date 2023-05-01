@@ -11,15 +11,17 @@ class TodoSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user_id = self.context['request'].user.id
-        if len(attrs['title']) < 5:
-            raise ValidationError("5자 이상 부터 등록이 가능합니다!")
-        existing_todo = Todo.objects.filter(
-            do_at=attrs['do_at'],
-            title=attrs['title'],
-            user_id=user_id
-        ).exists()
-        if existing_todo:
-            raise ValidationError("이미 존재 하는 할 일 입니다!")
+        if attrs.get('title'):
+            if len(attrs['title']) < 5:
+                raise ValidationError("5자 이상 부터 등록이 가능합니다!")
+        if attrs.get('do_at'):
+            existing_todo = Todo.objects.filter(
+                do_at=attrs['do_at'],
+                title=attrs['title'],
+                user_id=user_id
+            ).exists()
+            if existing_todo:
+                raise ValidationError("이미 존재 하는 할 일 입니다!")
         return attrs
 
     def get_user(self, obj):
